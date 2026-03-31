@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIV2 CFG EDITOR</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060608;
+  --glass: rgba(255,255,255,0.035);
+  --glass-b: rgba(255,255,255,0.08);
+  --glass-h: rgba(255,255,255,0.06);
+  --p: #c4a7e7;
+  --pd: rgba(196,167,231,0.13);
+  --pg: rgba(196,167,231,0.3);
+  --w: #efefef;
+  --wd: rgba(239,239,239,0.45);
+  --ok: #9ecf9a;
+  --ng: #e07b74;
+  --mono: 'Share Tech Mono', monospace;
+  --ui: 'Rajdhani', sans-serif;
+  --title: 'Orbitron', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--w);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
+
+#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 700px 500px at 15% 25%,rgba(196,167,231,.05) 0%,transparent 65%),radial-gradient(ellipse 500px 700px at 85% 75%,rgba(196,167,231,.035) 0%,transparent 65%)}
+
+.wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:36px 24px 100px}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--glass-b)}
+.logo h1{font-family:var(--title);font-size:1.45rem;font-weight:900;letter-spacing:.14em;color:var(--w);text-transform:uppercase}
+.logo h1 em{color:var(--p);font-style:normal}
+.logo sub{font-family:var(--mono);font-size:.58rem;color:var(--wd);letter-spacing:.22em;text-transform:uppercase;margin-top:4px;display:block}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.pill{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--p);background:var(--pd);border:1px solid rgba(196,167,231,.28);padding:5px 12px;border-radius:2px;text-transform:uppercase}
+#file-badge{display:none;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--ok);background:rgba(158,207,154,.09);border:1px solid rgba(158,207,154,.25);padding:5px 12px;border-radius:2px}
+
+/* CARD */
+.card{background:var(--glass);border:1px solid var(--glass-b);border-radius:3px;backdrop-filter:blur(24px) saturate(130%);-webkit-backdrop-filter:blur(24px) saturate(130%);padding:24px 28px;position:relative;overflow:hidden;margin-bottom:14px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.45),transparent)}
+.cc{position:absolute;width:8px;height:8px;border-color:var(--p);border-style:solid;opacity:.4}
+.cc.tl{top:0;left:0;border-width:1px 0 0 1px}.cc.tr{top:0;right:0;border-width:1px 1px 0 0}
+.cc.bl{bottom:0;left:0;border-width:0 0 1px 1px}.cc.br{bottom:0;right:0;border-width:0 1px 1px 0}
+
+/* SECTION LABEL */
+.slabel{font-family:var(--mono);font-size:.58rem;letter-spacing:.3em;color:var(--p);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.slabel::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--glass-b),transparent)}
+
+/* DROP ZONE */
+#drop-zone{border:1px dashed rgba(196,167,231,.28);border-radius:3px;padding:32px;text-align:center;cursor:pointer;transition:all .22s;background:transparent;margin-bottom:22px;position:relative;overflow:hidden}
+#drop-zone:hover,#drop-zone.drag-over{border-color:var(--p);background:var(--pd)}
+#drop-zone svg{margin:0 auto 10px;display:block;opacity:.45}
+#drop-zone h3{font-family:var(--title);font-size:.82rem;letter-spacing:.14em;margin-bottom:5px}
+#drop-zone p{font-family:var(--mono);font-size:.6rem;color:var(--wd);letter-spacing:.08em}
+#drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* PRESET BAR */
+.preset-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.plabel{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;color:var(--wd);text-transform:uppercase}
+.pbtn{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 16px;border:1px solid var(--glass-b);border-radius:2px;background:var(--glass);color:var(--wd);cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.pbtn::after{content:'';position:absolute;inset:0;background:var(--pd);opacity:0;transition:opacity .18s}
+.pbtn:hover{border-color:var(--p);color:var(--p)}.pbtn:hover::after{opacity:1}
+.pbtn.star{border-color:rgba(239,239,239,.22);color:var(--w)}
+.pbtn.star:hover{border-color:var(--w);box-shadow:0 0 10px rgba(255,255,255,.08)}
+
+/* SETTINGS */
+#settings-panel{display:none}
+#settings-panel.on{display:block}
+
+.cat-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px}
+.ctab{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;padding:5px 13px;border:1px solid var(--glass-b);border-radius:2px;background:transparent;color:var(--wd);cursor:pointer;transition:all .16s}
+.ctab:hover,.ctab.on{background:var(--pd);border-color:var(--p);color:var(--p)}
+
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:6px}
+
+.srow{display:flex;align-items:center;padding:9px 14px;gap:10px;background:var(--glass);border:1px solid var(--glass-b);border-radius:2px;transition:all .18s}
+.srow:hover{background:var(--glass-h);border-color:rgba(196,167,231,.18)}
+.skey{font-family:var(--mono);font-size:.66rem;color:var(--wd);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .16s}
+.srow:hover .skey{color:var(--w)}
+
+/* SLIDER */
+.slider-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.slider-wrap input[type=range]{-webkit-appearance:none;appearance:none;width:110px;height:2px;border-radius:2px;outline:none;cursor:pointer;background:rgba(196,167,231,.18)}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--p);border:2px solid var(--bg);box-shadow:0 0 6px var(--pg);cursor:pointer;transition:box-shadow .15s}
+.slider-wrap input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 11px var(--p)}
+.slider-val{font-family:var(--mono);font-size:.68rem;color:var(--p);min-width:44px;text-align:right;cursor:pointer;user-select:none}
+.slider-val:hover{text-decoration:underline dotted rgba(196,167,231,.6)}
+.val-edit{font-family:var(--mono);font-size:.68rem;background:rgba(0,0,0,.5);border:1px solid var(--p);color:var(--p);padding:2px 6px;border-radius:2px;width:62px;text-align:right;outline:none}
+.val-edit::-webkit-inner-spin-button,.val-edit::-webkit-outer-spin-button{-webkit-appearance:none}
+
+/* TOGGLE */
+.tog-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.tog-lbl{font-family:var(--mono);font-size:.6rem;min-width:26px}
+.tog{position:relative;width:38px;height:20px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:rgba(255,255,255,.07);border:1px solid var(--glass-b);border-radius:20px;cursor:pointer;transition:all .22s}
+.tog-sl::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--wd);border-radius:50%;transition:all .22s}
+.tog input:checked+.tog-sl{background:var(--pd);border-color:var(--p)}
+.tog input:checked+.tog-sl::before{transform:translateX(18px);background:var(--p);box-shadow:0 0 6px var(--pg)}
+
+/* ACTION BAR */
+.action-bar{display:flex;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--glass-b);flex-wrap:wrap;align-items:center;justify-content:space-between}
+.abl{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;padding:9px 20px;border-radius:2px;cursor:pointer;border:1px solid transparent;transition:all .18s}
+.btn-p{background:var(--pd);border-color:var(--p);color:var(--p)}
+.btn-p:hover{background:rgba(196,167,231,.22);box-shadow:0 0 18px var(--pg);color:#e8e0f5}
+.btn-g{background:transparent;border-color:var(--glass-b);color:var(--wd)}
+.btn-g:hover{border-color:var(--wd);color:var(--w)}
+.btn-d{background:transparent;border-color:rgba(224,123,116,.25);color:rgba(224,123,116,.55)}
+.btn-d:hover{background:rgba(224,123,116,.09);border-color:var(--ng);color:var(--ng)}
+
+/* RAW MODAL */
+#raw-modal{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(8px)}
+#raw-modal.on{display:flex}
+.raw-box{background:rgba(7,7,10,.96);border:1px solid var(--glass-b);border-radius:3px;width:min(880px,92vw);max-height:80vh;display:flex;flex-direction:column;position:relative;overflow:hidden;animation:popIn .22s ease}
+@keyframes popIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+.raw-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.5),transparent)}
+.raw-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--glass-b)}
+.raw-hdr span{font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;color:var(--p);text-transform:uppercase}
+.raw-close{font-family:var(--mono);font-size:.8rem;color:var(--wd);background:transparent;border:none;cursor:pointer;transition:color .15s;padding:2px 6px;border-radius:2px}
+.raw-close:hover{color:var(--w);background:rgba(255,255,255,.06)}
+#raw-out{font-family:var(--mono);font-size:.7rem;line-height:1.8;padding:20px;color:var(--wd);overflow-y:auto;white-space:pre;flex:1}
+#raw-out .rk{color:var(--w)}
+#raw-out .rn{color:#7ec8e3}
+#raw-out .rt{color:var(--ok)}
+#raw-out .rf{color:var(--ng)}
+.raw-ftr{padding:12px 20px;border-top:1px solid var(--glass-b);display:flex;gap:8px;justify-content:flex-end}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;right:28px;z-index:200;font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;padding:10px 20px;background:rgba(6,6,8,.95);border:1px solid var(--p);border-radius:2px;color:var(--p);backdrop-filter:blur(20px);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+#toast.on{opacity:1;transform:translateY(0)}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(196,167,231,.28);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--p)}
+
+@media(max-width:600px){
+  header{flex-direction:column;gap:12px;align-items:flex-start}
+  .sgrid{grid-template-columns:1fr}
+  .slider-wrap input[type=range]{width:80px}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="ambient"></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <h1>DIV<em>2</em> CFG EDITOR</h1>
+      <sub>graphic_settings.cfg // community tool</sub>
+    </div>
+    <div class="hdr-right">
+      <span id="file-badge">● LOADED</span>
+      <span class="pill">v2.0.0</span>
+    </div>
+  </header>
+
+  <!-- UPLOAD CARD -->
+  <div class="card">
+    <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
+    <div class="slabel">Load Config</div>
+    <div id="drop-zone">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4v18M8 14l8-10 8 10" stroke="#c4a7e7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 24h24v4H4z" stroke="#c4a7e7" stroke-width="1" opacity=".4"/>
+      </svg>
+      <h3>Drop graphic_settings.cfg here</h3>
+      <p>or click to browse · .cfg / .txt</p>
+      <input type="file" id="file-input" accept=".cfg,.txt">
+    </div>
+    <div class="slabel">Presets</div>
+    <div class="preset-bar">
+      <span class="plabel">Load //</span>
+      <button class="pbtn star" onclick="loadPreset('fullbright')">★ Fullbright</button>
+      <button class="pbtn" onclick="loadPreset('low')">Low</button>
+      <button class="pbtn" onclick="loadPreset('medium')">Medium</button>
+      <button class="pbtn" onclick="loadPreset('high')">High</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS CARD (hidden until loaded) -->
+  <div class="card" id="settings-panel">
+    <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
+    <div class="slabel">Settings</div>
+    <div class="cat-tabs" id="cat-tabs"></div>
+    <div class="sgrid" id="sgrid"></div>
+    <div class="action-bar">
+      <div class="abl">
+        <button class="btn btn-p" onclick="downloadCfg()">⬇ Download .cfg</button>
+        <button class="btn btn-g" onclick="openRaw()">{ } Raw</button>
+      </div>
+      <button class="btn btn-d" onclick="resetEditor()">✕ Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- RAW MODAL -->
+<div id="raw-modal">
+  <div class="raw-box">
+    <div class="raw-hdr">
+      <span>// Raw Config Output</span>
+      <button class="raw-close" onclick="closeRaw()">✕ close</button>
+    </div>
+    <pre id="raw-out"></pre>
+    <div class="raw-ftr">
+      <button class="btn btn-g" onclick="copyRaw()">⧉ Copy</button>
+      <button class="btn btn-p" onclick="downloadCfg();closeRaw()">⬇ Download</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── SETTING META (min/max/step/note) ─────────────────────────────────────────
+const META = {
+  allowedTearing:              {min:0,max:1,step:1,note:'0=off 1=on'},
+  "anisotropy quality":        {min:0,max:16,step:1},
+  brightness2:                 {min:-1,max:1,step:0.05},
+  contrast2:                   {min:0,max:1,step:0.05},
+  customFPSLimit:              {min:30,max:300,step:1},
+  "extra streaming distance":  {min:0,max:1000,step:10},
+  fog:                         {min:0,max:4,step:1},
+  "hdr UI peak":               {min:100,max:1000,step:50},
+  "hdr peak":                  {min:400,max:5000,step:100},
+  look2:                       {min:-1,max:1,step:0.05},
+  "max anisotropy":            {min:1,max:16,step:1},
+  maxFramerate:                {min:0,max:1,step:1,note:'0=unlimited 1=cap'},
+  "num spot shadows":          {min:0,max:16,step:1},
+  "object detail":             {min:-1,max:1,step:0.1},
+  "particle quality":          {min:0,max:2,step:1},
+  presentInterval:             {min:0,max:4,step:1,note:'0=no vsync'},
+  "prio culling distance0":    {min:50,max:2000,step:10},
+  "prio culling distance1":    {min:50,max:1500,step:10},
+  "prio culling distance2":    {min:50,max:1000,step:10},
+  "prio culling distance3":    {min:50,max:800,step:10},
+  "projected textures resolution":{min:0,max:2,step:1},
+  "reflected objects quality": {min:0,max:2,step:1},
+  reflections:                 {min:0,max:2,step:1},
+  "sector lastlod distance":   {min:16,max:512,step:8},
+  "shadow distance":           {min:0,max:200,step:5},
+  "shadow quality2":           {min:0,max:2,step:1},
+  sharpen2:                    {min:0,max:1,step:0.01},
+  "simple shadow filter":      {min:0,max:1,step:1},
+  "spot shadow resolution":    {min:0,max:2,step:1},
+  "ss reflection3":            {min:0,max:2,step:1},
+  "ss shadows2":               {min:0,max:2,step:1},
+  "ssao quality 2":            {min:0,max:2,step:1},
+  stereo3d:                    {min:0,max:1,step:1},
+  stereoeyedist:               {min:0.01,max:0.3,step:0.001},
+  stereoscreensize:            {min:0.5,max:3,step:0.1},
+  "streamer dedicated budget": {min:256,max:4096,step:128,note:'MB'},
+  "streamer memory fraction":  {min:0.1,max:1,step:0.05},
+  taa:                         {min:0,max:2,step:1,note:'0=off 1=TAA 2=TAAU'},
+  "terrain texture lod":       {min:0,max:100,step:5},
+  "terrain vertex lod":        {min:1,max:10,step:1},
+  "vegetation quality":        {min:0,max:2,step:1},
+  "view scale":                {min:0.5,max:1,step:0.05,note:'render scale'},
+  "view scale maximum":        {min:0.5,max:1,step:0.05},
+  "view scale minimum":        {min:0.1,max:1,step:0.05},
+  "water quality":             {min:0,max:2,step:1},
+};
+
+const CATEGORIES = {
+  Performance:  ['customFPSLimit','maxFramerate','presentInterval','allowedTearing','taa','view scale','view scale maximum','view scale minimum'],
+  Shadows:      ['shadow distance','shadow quality2','num spot shadows','spot shadow resolution','simple shadow filter','ss shadows2'],
+  Reflections:  ['reflections','reflected objects quality','ss reflection3','projected textures resolution'],
+  'Post FX':    ['bloom','bloom dirt','chromatic aberration','dof','fogBlur','glare','vignette','sss3','sharpen2','ssao quality 2'],
+  Texture:      ['anisotropy quality','max anisotropy','parallax mapping2','terrain high quality texture compression','terrain texture lod','terrain vertex lod','high res sky textures'],
+  World:        ['fog','indoor','distant envmap','extra streaming distance','object detail','particle quality','vegetation quality','water quality','snow particles wind','sector lastlod distance','prio culling distance0','prio culling distance1','prio culling distance2','prio culling distance3'],
+  Streaming:    ['streamer dedicated budget','streamer memory fraction'],
+  Display:      ['brightness2','contrast2','look2','hdr peak','hdr UI peak','stereo3d','stereoeyedist','stereoscreensize'],
+};
+
+const PRESETS = {
+  fullbright:{allowedTearing:1,"anisotropy quality":0,bloom:false,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:145,"distant envmap":true,dof:false,"extra streaming distance":0,fog:2,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":3000,"high res sky textures":false,indoor:false,look2:0,"max anisotropy":2,maxFramerate:1,"num spot shadows":1,"object detail":-0.5,"parallax mapping2":false,"particle quality":0,presentInterval:0,"prio culling distance0":550,"prio culling distance1":250,"prio culling distance2":120,"prio culling distance3":100,"projected textures resolution":0,"reflected objects quality":0,reflections:0,"sector lastlod distance":128,"shadow distance":20,"shadow quality2":0,sharpen2:0.7,"simple shadow filter":1,"snow particles wind":false,"spot shadow resolution":0,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":0,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":1024,"streamer memory fraction":0.75,taa:2,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":5,"vegetation quality":0,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":0},
+  low:{allowedTearing:1,"anisotropy quality":0,bloom:false,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:165,"distant envmap":false,dof:false,"extra streaming distance":0,fog:1,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":1000,"high res sky textures":false,indoor:false,look2:0,"max anisotropy":2,maxFramerate:1,"num spot shadows":1,"object detail":0,"parallax mapping2":false,"particle quality":0,presentInterval:0,"prio culling distance0":400,"prio culling distance1":200,"prio culling distance2":100,"prio culling distance3":80,"projected textures resolution":0,"reflected objects quality":0,reflections:0,"sector lastlod distance":64,"shadow distance":10,"shadow quality2":0,sharpen2:0,"simple shadow filter":1,"snow particles wind":false,"spot shadow resolution":0,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":0,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":512,"streamer memory fraction":0.5,taa:0,"terrain high quality texture compression":false,"terrain texture lod":50,"terrain vertex lod":3,"vegetation quality":0,"view scale":0.85,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":0},
+  medium:{allowedTearing:0,"anisotropy quality":4,bloom:true,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:144,"distant envmap":true,dof:false,"extra streaming distance":100,fog:2,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":1500,"high res sky textures":true,indoor:true,look2:0,"max anisotropy":8,maxFramerate:0,"num spot shadows":4,"object detail":0.5,"parallax mapping2":false,"particle quality":1,presentInterval:0,"prio culling distance0":800,"prio culling distance1":400,"prio culling distance2":200,"prio culling distance3":150,"projected textures resolution":1,"reflected objects quality":1,reflections:1,"sector lastlod distance":192,"shadow distance":40,"shadow quality2":1,sharpen2:0.3,"simple shadow filter":1,"snow particles wind":true,"spot shadow resolution":1,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":1,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":1024,"streamer memory fraction":0.75,taa:1,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":5,"vegetation quality":1,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":1},
+  high:{allowedTearing:0,"anisotropy quality":16,bloom:true,"bloom dirt":true,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:144,"distant envmap":true,dof:true,"extra streaming distance":300,fog:3,fogBlur:true,glare:true,"hdr UI peak":600,"hdr peak":3000,"high res sky textures":true,indoor:true,look2:0,"max anisotropy":16,maxFramerate:0,"num spot shadows":8,"object detail":1,"parallax mapping2":true,"particle quality":2,presentInterval:0,"prio culling distance0":1200,"prio culling distance1":700,"prio culling distance2":400,"prio culling distance3":300,"projected textures resolution":2,"reflected objects quality":2,reflections:2,"sector lastlod distance":256,"shadow distance":80,"shadow quality2":2,sharpen2:0.2,"simple shadow filter":0,"snow particles wind":true,"spot shadow resolution":2,"ss reflection3":2,"ss shadows2":2,"ssao quality 2":2,sss3:true,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":2048,"streamer memory fraction":0.85,taa:2,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":8,"vegetation quality":2,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:true,"water quality":2},
+};
+
+let config = {}, activeCat = 'Performance';
+
+// ── PARSE ────────────────────────────────────────────────────────────────────
+function parseCfg(text) {
+  const r = {};
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (!t||t==='{' ||t==='}') continue;
+    const m = t.match(/^\["([^"]+)"\]\s*=\s*(.+?),?\s*$/) ||
+              t.match(/^([a-zA-Z_]\w*)\s*=\s*(.+?),?\s*$/);
+    if (!m) continue;
+    let v = m[2].trim().replace(/,$/, '');
+    if (v==='true') r[m[1]]=true;
+    else if (v==='false') r[m[1]]=false;
+    else if (!isNaN(v)) r[m[1]]=parseFloat(v);
+    else r[m[1]]=v;
+  }
+  return r;
+}
+
+// ── SERIALIZE ─────────────────────────────────────────────────────────────────
+function serializeCfg(cfg) {
+  let o='{\n';
+  for (const [k,v] of Object.entries(cfg)) {
+    const ks=/^[a-zA-Z_]\w*$/.test(k)?k:`["${k}"]`;
+    let vs;
+    if (typeof v==='boolean') vs=v?'true':'false';
+    else if (typeof v==='number') vs=Number.isInteger(v)?String(v):parseFloat(v.toFixed(8)).toString();
+    else vs=String(v);
+    o+=`\t${ks} = ${vs},\n`;
+  }
+  return o+'}';
+}
+
+// ── BUILD EDITOR ──────────────────────────────────────────────────────────────
+function buildEditor() {
+  document.getElementById('settings-panel').classList.add('on');
+
+  const te=document.getElementById('cat-tabs');
+  te.innerHTML='';
+  for (const cat of [...Object.keys(CATEGORIES),'All']) {
+    const b=document.createElement('button');
+    b.className='ctab'+(cat===activeCat?' on':'');
+    b.textContent=cat;
+    b.onclick=()=>{activeCat=cat;buildEditor()};
+    te.appendChild(b);
+  }
+
+  const grid=document.getElementById('sgrid');
+  grid.innerHTML='';
+  const keys=activeCat==='All'?Object.keys(config):(CATEGORIES[activeCat]||[]).filter(k=>k in config);
+
+  for (const key of keys) {
+    const val=config[key];
+    const row=document.createElement('div');
+    row.className='srow';
+
+    const lbl=document.createElement('span');
+    lbl.className='skey';
+    lbl.textContent=key;
+    const m=META[key];
+    if (m?.note) lbl.title=m.note;
+    row.appendChild(lbl);
+
+    if (typeof val==='boolean') {
+      // TOGGLE
+      const wrap=document.createElement('div'); wrap.className='tog-wrap';
+      const vl=document.createElement('span'); vl.className='tog-lbl';
+      vl.style.color=val?'var(--ok)':'var(--ng)';
+      vl.textContent=val?'ON':'OFF';
+      const lab=document.createElement('label'); lab.className='tog';
+      const inp=document.createElement('input'); inp.type='checkbox'; inp.checked=val;
+      inp.onchange=()=>{
+        config[key]=inp.checked;
+        vl.textContent=inp.checked?'ON':'OFF';
+        vl.style.color=inp.checked?'var(--ok)':'var(--ng)';
+      };
+      const sl=document.createElement('span'); sl.className='tog-sl';
+      lab.appendChild(inp); lab.appendChild(sl);
+      wrap.appendChild(vl); wrap.appendChild(lab);
+      row.appendChild(wrap);
+
+    } else if (typeof val==='number' && m) {
+      // SLIDER with click-to-type
+      const wrap=document.createElement('div'); wrap.className='slider-wrap';
+      const slider=document.createElement('input');
+      slider.type='range';
+      slider.min=m.min; slider.max=m.max; slider.step=m.step;
+      slider.value=Math.min(m.max,Math.max(m.min,val));
+
+      const setFill=()=>{
+        const pct=((slider.value-m.min)/(m.max-m.min))*100;
+        slider.style.background=`linear-gradient(90deg,rgba(196,167,231,.65) ${pct}%,rgba(196,167,231,.15) ${pct}%)`;
+      };
+      setFill();
+
+      const vd=document.createElement('span');
+      vd.className='slider-val';
+      vd.textContent=parseFloat(slider.value).toString();
+      vd.title='Click to type';
+
+      slider.oninput=()=>{
+        const n=parseFloat(slider.value);
+        config[key]=n;
+        vd.textContent=n.toString();
+        setFill();
+      };
+
+      vd.onclick=()=>{
+        const ed=document.createElement('input');
+        ed.className='val-edit'; ed.type='number';
+        ed.value=config[key]; ed.min=m.min; ed.max=m.max; ed.step=m.step;
+        vd.replaceWith(ed); ed.focus(); ed.select();
+        const commit=()=>{
+          let n=parseFloat(ed.value);
+          if(isNaN(n)) n=config[key];
+          n=Math.min(m.max,Math.max(m.min,n));
+          config[key]=n; slider.value=n; setFill();
+          vd.textContent=n.toString(); ed.replaceWith(vd);
+        };
+        ed.onblur=commit;
+        ed.onkeydown=e=>{if(e.key==='Enter')commit();if(e.key==='Escape')ed.replaceWith(vd);};
+      };
+
+      wrap.appendChild(slider); wrap.appendChild(vd);
+      row.appendChild(wrap);
+
+    } else {
+      // fallback text input
+      const inp=document.createElement('input');
+      inp.className='val-edit'; inp.type='number'; inp.value=val; inp.style.width='70px';
+      inp.oninput=()=>{const n=parseFloat(inp.value);if(!isNaN(n))config[key]=n;};
+      row.appendChild(inp);
+    }
+
+    grid.appendChild(row);
+  }
+}
+
+// ── RAW MODAL ─────────────────────────────────────────────────────────────────
+function openRaw() {
+  const raw=serializeCfg(config).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  document.getElementById('raw-out').innerHTML=raw
+    .replace(/(\["[^"]+"\]|\t[a-zA-Z_]\w*)/g,'<span class="rk">$1</span>')
+    .replace(/\b(true)\b/g,'<span class="rt">$1</span>')
+    .replace(/\b(false)\b/g,'<span class="rf">$1</span>')
+    .replace(/= (-?\d+\.?\d*)/g,'= <span class="rn">$1</span>');
+  document.getElementById('raw-modal').classList.add('on');
+}
+function closeRaw(){document.getElementById('raw-modal').classList.remove('on')}
+function copyRaw(){navigator.clipboard.writeText(serializeCfg(config)).then(()=>showToast('Copied ✓'))}
+
+document.getElementById('raw-modal').onclick=e=>{if(e.target===document.getElementById('raw-modal'))closeRaw()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRaw()});
+
+// ── DOWNLOAD ──────────────────────────────────────────────────────────────────
+function downloadCfg(){
+  const blob=new Blob([serializeCfg(config)],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='graphic_settings.cfg'; a.click();
+  showToast('graphic_settings.cfg downloaded ✓');
+}
+
+// ── PRESETS ───────────────────────────────────────────────────────────────────
+function loadPreset(name){
+  config={...PRESETS[name]};
+  activeCat='Performance';
+  const b=document.getElementById('file-badge');
+  b.style.display='inline-block';
+  b.textContent=`● PRESET: ${name.toUpperCase()}`;
+  buildEditor();
+  showToast(`Preset "${name}" loaded`);
+}
+
+// ── FILE LOAD ─────────────────────────────────────────────────────────────────
+function handleFile(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    config=parseCfg(e.target.result);
+    activeCat='Performance';
+    const b=document.getElementById('file-badge');
+    b.style.display='inline-block'; b.textContent=`● ${file.name}`;
+    buildEditor(); showToast('Config loaded ✓');
+  };
+  r.readAsText(file);
+}
+document.getElementById('file-input').onchange=e=>{if(e.target.files[0])handleFile(e.target.files[0])};
+const dz=document.getElementById('drop-zone');
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('drag-over')};
+dz.ondragleave=()=>dz.classList.remove('drag-over');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
+
+// ── RESET ─────────────────────────────────────────────────────────────────────
+function resetEditor(){
+  config={};
+  document.getElementById('settings-panel').classList.remove('on');
+  document.getElementById('file-badge').style.display='none';
+  showToast('Cleared');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let tt;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2400);
+}
+
+// ── ANIMATED DOT MATRIX CANVAS ───────────────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  const STEP=28, DOT_R=1;
+  let W,H,cols,rows,allEdges,staticEdges,pulses=[];
+
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+    cols=Math.ceil(W/STEP)+1;
+    rows=Math.ceil(H/STEP)+1;
+    build();
+  }
+
+  function dotXY(i){ return {x:(i%cols)*STEP+STEP/2, y:Math.floor(i/cols)*STEP+STEP/2} }
+  function idx(r,c){ return r*cols+c }
+
+  function build(){
+    allEdges=[];
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(c+1<cols) allEdges.push([idx(r,c),idx(r,c+1)]);
+        if(r+1<rows) allEdges.push([idx(r,c),idx(r+1,c)]);
+        if(r+1<rows&&c+1<cols&&Math.random()<0.12) allEdges.push([idx(r,c),idx(r+1,c+1)]);
+        if(r+1<rows&&c-1>=0&&Math.random()<0.08) allEdges.push([idx(r,c),idx(r+1,c-1)]);
+      }
+    }
+    staticEdges=[...allEdges].sort(()=>Math.random()-.5).slice(0,80);
+    pulses=[];
+    for(let i=0;i<20;i++) spawnPulse(true);
+  }
+
+  function spawnPulse(immediate){
+    if(!allEdges||!allEdges.length) return;
+    const e=allEdges[Math.floor(Math.random()*allEdges.length)];
+    pulses.push({
+      a:e[0], b:e[1],
+      t:immediate?Math.random():0,
+      speed:0.003+Math.random()*0.009,
+      alpha:0.45+Math.random()*0.55,
+      size:3+Math.random()*4,
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // static faint connecting lines
+    ctx.lineWidth=0.4;
+    ctx.strokeStyle='rgba(196,167,231,0.06)';
+    for(const [ai,bi] of staticEdges){
+      const a=dotXY(ai),b=dotXY(bi);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+
+    // dot grid
+    const total=cols*rows;
+    for(let i=0;i<total;i++){
+      const {x,y}=dotXY(i);
+      ctx.beginPath(); ctx.arc(x,y,DOT_R,0,Math.PI*2);
+      ctx.fillStyle='rgba(196,167,231,0.18)'; ctx.fill();
+    }
+
+    // moving signal pulses
+    const dead=[];
+    for(let i=0;i<pulses.length;i++){
+      const p=pulses[i];
+      p.t+=p.speed;
+      if(p.t>=1){dead.push(i);continue}
+      const a=dotXY(p.a),b=dotXY(p.b);
+      const px=a.x+(b.x-a.x)*p.t;
+      const py=a.y+(b.y-a.y)*p.t;
+
+      // trail line
+      const grad=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+      const trailStart=Math.max(0,p.t-0.4);
+      grad.addColorStop(trailStart,`rgba(196,167,231,0)`);
+      grad.addColorStop(p.t,`rgba(196,167,231,${p.alpha*0.5})`);
+      ctx.beginPath(); ctx.strokeStyle=grad; ctx.lineWidth=1;
+      ctx.moveTo(a.x+(b.x-a.x)*trailStart, a.y+(b.y-a.y)*trailStart);
+      ctx.lineTo(px,py); ctx.stroke();
+
+      // glowing head
+      const g=ctx.createRadialGradient(px,py,0,px,py,p.size);
+      g.addColorStop(0,`rgba(230,215,255,${p.alpha})`);
+      g.addColorStop(0.4,`rgba(196,167,231,${p.alpha*0.5})`);
+      g.addColorStop(1,'rgba(196,167,231,0)');
+      ctx.beginPath(); ctx.arc(px,py,p.size,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+    }
+
+    for(let i=dead.length-1;i>=0;i--) pulses.splice(dead[i],1);
+    while(pulses.length<20) spawnPulse(false);
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize',resize);
+  resize();
+  draw();
+})();
+</script>
+</body>
+</html>
