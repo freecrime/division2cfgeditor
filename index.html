@@ -3,146 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DIV2 CFG EDITOR</title>
+<title>DIV2 COMMUNITY HUB</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #060608;
-  --glass: rgba(255,255,255,0.035);
+  --glass: rgba(255,255,255,0.03);
   --glass-b: rgba(255,255,255,0.08);
-  --glass-h: rgba(255,255,255,0.06);
+  --glass-h: rgba(255,255,255,0.055);
   --p: #c4a7e7;
-  --pd: rgba(196,167,231,0.13);
+  --pd: rgba(196,167,231,0.12);
   --pg: rgba(196,167,231,0.3);
   --w: #efefef;
   --wd: rgba(239,239,239,0.45);
   --ok: #9ecf9a;
   --ng: #e07b74;
+  --gold: #e8c87a;
   --mono: 'Share Tech Mono', monospace;
   --ui: 'Rajdhani', sans-serif;
   --title: 'Orbitron', monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--w);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
 
 #bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 700px 500px at 15% 25%,rgba(196,167,231,.05) 0%,transparent 65%),radial-gradient(ellipse 500px 700px at 85% 75%,rgba(196,167,231,.035) 0%,transparent 65%)}
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 800px 600px at 10% 20%,rgba(196,167,231,.04) 0%,transparent 70%),
+    radial-gradient(ellipse 600px 800px at 90% 80%,rgba(196,167,231,.03) 0%,transparent 70%)}
 
-.wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:36px 24px 100px}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:36px 24px 100px}
 
-/* HEADER */
+/* ─── NAV TABS ──────────────────────────────────────────────────────────────── */
+.main-nav{display:flex;gap:0;margin-bottom:32px;border-bottom:1px solid var(--glass-b);position:relative}
+.main-nav::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.15),transparent)}
+.nav-tab{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;padding:12px 22px;background:transparent;border:none;color:var(--wd);cursor:pointer;transition:all .2s;position:relative;border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav-tab:hover{color:var(--w)}
+.nav-tab.active{color:var(--p);border-bottom-color:var(--p)}
+.nav-tab.active::before{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--p);box-shadow:0 0 10px var(--pg)}
+
+/* ─── PAGE SECTIONS ─────────────────────────────────────────────────────────── */
+.page{display:none}.page.active{display:block}
+
+/* ─── HEADER ────────────────────────────────────────────────────────────────── */
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;padding-bottom:22px;border-bottom:1px solid var(--glass-b)}
-.logo h1{font-family:var(--title);font-size:1.45rem;font-weight:900;letter-spacing:.14em;color:var(--w);text-transform:uppercase}
+.logo h1{font-family:var(--title);font-size:1.35rem;font-weight:900;letter-spacing:.14em;color:var(--w);text-transform:uppercase}
 .logo h1 em{color:var(--p);font-style:normal}
-.logo sub{font-family:var(--mono);font-size:.58rem;color:var(--wd);letter-spacing:.22em;text-transform:uppercase;margin-top:4px;display:block}
+.logo sub{font-family:var(--mono);font-size:.56rem;color:var(--wd);letter-spacing:.22em;text-transform:uppercase;margin-top:4px;display:block}
 .hdr-right{display:flex;gap:8px;align-items:center}
-.pill{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--p);background:var(--pd);border:1px solid rgba(196,167,231,.28);padding:5px 12px;border-radius:2px;text-transform:uppercase}
-#file-badge{display:none;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--ok);background:rgba(158,207,154,.09);border:1px solid rgba(158,207,154,.25);padding:5px 12px;border-radius:2px}
+.pill{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--p);background:var(--pd);border:1px solid rgba(196,167,231,.28);padding:5px 12px;border-radius:2px;text-transform:uppercase}
+#file-badge{display:none;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;color:var(--ok);background:rgba(158,207,154,.09);border:1px solid rgba(158,207,154,.25);padding:5px 12px;border-radius:2px}
 
-/* CARD */
+/* ─── CARD ──────────────────────────────────────────────────────────────────── */
 .card{background:var(--glass);border:1px solid var(--glass-b);border-radius:3px;backdrop-filter:blur(24px) saturate(130%);-webkit-backdrop-filter:blur(24px) saturate(130%);padding:24px 28px;position:relative;overflow:hidden;margin-bottom:14px}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.45),transparent)}
-.cc{position:absolute;width:8px;height:8px;border-color:var(--p);border-style:solid;opacity:.4}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.4),transparent)}
+.cc{position:absolute;width:8px;height:8px;border-color:var(--p);border-style:solid;opacity:.35}
 .cc.tl{top:0;left:0;border-width:1px 0 0 1px}.cc.tr{top:0;right:0;border-width:1px 1px 0 0}
 .cc.bl{bottom:0;left:0;border-width:0 0 1px 1px}.cc.br{bottom:0;right:0;border-width:0 1px 1px 0}
 
-/* SECTION LABEL */
-.slabel{font-family:var(--mono);font-size:.58rem;letter-spacing:.3em;color:var(--p);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+/* ─── SECTION LABEL ─────────────────────────────────────────────────────────── */
+.slabel{font-family:var(--mono);font-size:.56rem;letter-spacing:.3em;color:var(--p);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
 .slabel::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--glass-b),transparent)}
 
-/* DROP ZONE */
-#drop-zone{border:1px dashed rgba(196,167,231,.28);border-radius:3px;padding:32px;text-align:center;cursor:pointer;transition:all .22s;background:transparent;margin-bottom:22px;position:relative;overflow:hidden}
+/* ─── DROP ZONE ─────────────────────────────────────────────────────────────── */
+#drop-zone{border:1px dashed rgba(196,167,231,.25);border-radius:3px;padding:32px;text-align:center;cursor:pointer;transition:all .22s;background:transparent;margin-bottom:22px;position:relative;overflow:hidden}
 #drop-zone:hover,#drop-zone.drag-over{border-color:var(--p);background:var(--pd)}
-#drop-zone svg{margin:0 auto 10px;display:block;opacity:.45}
-#drop-zone h3{font-family:var(--title);font-size:.82rem;letter-spacing:.14em;margin-bottom:5px}
-#drop-zone p{font-family:var(--mono);font-size:.6rem;color:var(--wd);letter-spacing:.08em}
+#drop-zone svg{margin:0 auto 10px;display:block;opacity:.4}
+#drop-zone h3{font-family:var(--title);font-size:.78rem;letter-spacing:.14em;margin-bottom:5px}
+#drop-zone p{font-family:var(--mono);font-size:.58rem;color:var(--wd);letter-spacing:.08em}
 #drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
 
-/* PRESET BAR */
+#file-error{display:none;font-family:var(--mono);font-size:.62rem;color:var(--ng);background:rgba(224,123,116,.07);border:1px solid rgba(224,123,116,.22);border-radius:2px;padding:9px 14px;margin-bottom:14px;letter-spacing:.06em}
+
+/* ─── PRESET BAR ─────────────────────────────────────────────────────────────── */
+#preset-section{display:none}
+#preset-section.on{display:block}
 .preset-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.plabel{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;color:var(--wd);text-transform:uppercase}
-.pbtn{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 16px;border:1px solid var(--glass-b);border-radius:2px;background:var(--glass);color:var(--wd);cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.plabel{font-family:var(--mono);font-size:.56rem;letter-spacing:.18em;color:var(--wd);text-transform:uppercase}
+.pbtn{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 16px;border:1px solid var(--glass-b);border-radius:2px;background:var(--glass);color:var(--wd);cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
 .pbtn::after{content:'';position:absolute;inset:0;background:var(--pd);opacity:0;transition:opacity .18s}
 .pbtn:hover{border-color:var(--p);color:var(--p)}.pbtn:hover::after{opacity:1}
-.pbtn.star{border-color:rgba(239,239,239,.22);color:var(--w)}
-.pbtn.star:hover{border-color:var(--w);box-shadow:0 0 10px rgba(255,255,255,.08)}
 
-/* SETTINGS */
+/* ─── SETTINGS ──────────────────────────────────────────────────────────────── */
 #settings-panel{display:none}
 #settings-panel.on{display:block}
-
 .cat-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:20px}
-.ctab{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;padding:5px 13px;border:1px solid var(--glass-b);border-radius:2px;background:transparent;color:var(--wd);cursor:pointer;transition:all .16s}
+.ctab{font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;padding:5px 13px;border:1px solid var(--glass-b);border-radius:2px;background:transparent;color:var(--wd);cursor:pointer;transition:all .16s}
 .ctab:hover,.ctab.on{background:var(--pd);border-color:var(--p);color:var(--p)}
-
-.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:6px}
-
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:5px}
 .srow{display:flex;align-items:center;padding:9px 14px;gap:10px;background:var(--glass);border:1px solid var(--glass-b);border-radius:2px;transition:all .18s}
 .srow:hover{background:var(--glass-h);border-color:rgba(196,167,231,.18)}
-.skey{font-family:var(--mono);font-size:.66rem;color:var(--wd);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .16s}
+.skey{font-family:var(--mono);font-size:.64rem;color:var(--wd);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .16s}
 .srow:hover .skey{color:var(--w)}
 
-/* SLIDER */
+/* ─── SLIDER ────────────────────────────────────────────────────────────────── */
 .slider-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .slider-wrap input[type=range]{-webkit-appearance:none;appearance:none;width:110px;height:2px;border-radius:2px;outline:none;cursor:pointer;background:rgba(196,167,231,.18)}
 .slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--p);border:2px solid var(--bg);box-shadow:0 0 6px var(--pg);cursor:pointer;transition:box-shadow .15s}
-.slider-wrap input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 11px var(--p)}
-.slider-val{font-family:var(--mono);font-size:.68rem;color:var(--p);min-width:44px;text-align:right;cursor:pointer;user-select:none}
+.slider-wrap input[type=range]:hover::-webkit-slider-thumb{box-shadow:0 0 12px var(--p)}
+.slider-val{font-family:var(--mono);font-size:.66rem;color:var(--p);min-width:44px;text-align:right;cursor:pointer;user-select:none}
 .slider-val:hover{text-decoration:underline dotted rgba(196,167,231,.6)}
-.val-edit{font-family:var(--mono);font-size:.68rem;background:rgba(0,0,0,.5);border:1px solid var(--p);color:var(--p);padding:2px 6px;border-radius:2px;width:62px;text-align:right;outline:none}
+.val-edit{font-family:var(--mono);font-size:.66rem;background:rgba(0,0,0,.5);border:1px solid var(--p);color:var(--p);padding:2px 6px;border-radius:2px;width:62px;text-align:right;outline:none}
 .val-edit::-webkit-inner-spin-button,.val-edit::-webkit-outer-spin-button{-webkit-appearance:none}
 
-/* TOGGLE */
+/* ─── TOGGLE ────────────────────────────────────────────────────────────────── */
 .tog-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .tog-lbl{font-family:var(--mono);font-size:.6rem;min-width:26px}
 .tog{position:relative;width:38px;height:20px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0}
-.tog-sl{position:absolute;inset:0;background:rgba(255,255,255,.07);border:1px solid var(--glass-b);border-radius:20px;cursor:pointer;transition:all .22s}
+.tog-sl{position:absolute;inset:0;background:rgba(255,255,255,.06);border:1px solid var(--glass-b);border-radius:20px;cursor:pointer;transition:all .22s}
 .tog-sl::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--wd);border-radius:50%;transition:all .22s}
 .tog input:checked+.tog-sl{background:var(--pd);border-color:var(--p)}
 .tog input:checked+.tog-sl::before{transform:translateX(18px);background:var(--p);box-shadow:0 0 6px var(--pg)}
 
-/* ACTION BAR */
+/* ─── ACTION BAR ────────────────────────────────────────────────────────────── */
 .action-bar{display:flex;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--glass-b);flex-wrap:wrap;align-items:center;justify-content:space-between}
 .abl{display:flex;gap:8px;flex-wrap:wrap}
-.btn{font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;padding:9px 20px;border-radius:2px;cursor:pointer;border:1px solid transparent;transition:all .18s}
+.btn{font-family:var(--mono);font-size:.64rem;letter-spacing:.13em;text-transform:uppercase;padding:9px 20px;border-radius:2px;cursor:pointer;border:1px solid transparent;transition:all .18s}
 .btn-p{background:var(--pd);border-color:var(--p);color:var(--p)}
-.btn-p:hover{background:rgba(196,167,231,.22);box-shadow:0 0 18px var(--pg);color:#e8e0f5}
+.btn-p:hover{background:rgba(196,167,231,.2);box-shadow:0 0 18px var(--pg)}
 .btn-g{background:transparent;border-color:var(--glass-b);color:var(--wd)}
 .btn-g:hover{border-color:var(--wd);color:var(--w)}
 .btn-d{background:transparent;border-color:rgba(224,123,116,.25);color:rgba(224,123,116,.55)}
 .btn-d:hover{background:rgba(224,123,116,.09);border-color:var(--ng);color:var(--ng)}
 
-/* RAW MODAL */
-#raw-modal{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(8px)}
+/* ─── RAW MODAL ─────────────────────────────────────────────────────────────── */
+#raw-modal{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(8px)}
 #raw-modal.on{display:flex}
-.raw-box{background:rgba(7,7,10,.96);border:1px solid var(--glass-b);border-radius:3px;width:min(880px,92vw);max-height:80vh;display:flex;flex-direction:column;position:relative;overflow:hidden;animation:popIn .22s ease}
+.raw-box{background:rgba(7,7,10,.97);border:1px solid var(--glass-b);border-radius:3px;width:min(880px,92vw);max-height:80vh;display:flex;flex-direction:column;position:relative;overflow:hidden;animation:popIn .22s ease}
 @keyframes popIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
 .raw-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(196,167,231,.5),transparent)}
 .raw-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--glass-b)}
-.raw-hdr span{font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;color:var(--p);text-transform:uppercase}
+.raw-hdr span{font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;color:var(--p);text-transform:uppercase}
 .raw-close{font-family:var(--mono);font-size:.8rem;color:var(--wd);background:transparent;border:none;cursor:pointer;transition:color .15s;padding:2px 6px;border-radius:2px}
 .raw-close:hover{color:var(--w);background:rgba(255,255,255,.06)}
-#raw-out{font-family:var(--mono);font-size:.7rem;line-height:1.8;padding:20px;color:var(--wd);overflow-y:auto;white-space:pre;flex:1}
-#raw-out .rk{color:var(--w)}
-#raw-out .rn{color:#7ec8e3}
-#raw-out .rt{color:var(--ok)}
-#raw-out .rf{color:var(--ng)}
+#raw-out{font-family:var(--mono);font-size:.68rem;line-height:1.8;padding:20px;color:var(--wd);overflow-y:auto;white-space:pre;flex:1}
+#raw-out .rk{color:var(--w)}.raw-hdr span,.rn{color:#7ec8e3}.rt{color:var(--ok)}.rf{color:var(--ng)}
 .raw-ftr{padding:12px 20px;border-top:1px solid var(--glass-b);display:flex;gap:8px;justify-content:flex-end}
 
-/* TOAST */
-#toast{position:fixed;bottom:28px;right:28px;z-index:200;font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;padding:10px 20px;background:rgba(6,6,8,.95);border:1px solid var(--p);border-radius:2px;color:var(--p);backdrop-filter:blur(20px);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+/* ─── TOAST ─────────────────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:28px;right:28px;z-index:200;font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;padding:10px 20px;background:rgba(6,6,8,.96);border:1px solid var(--p);border-radius:2px;color:var(--p);backdrop-filter:blur(20px);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
 #toast.on{opacity:1;transform:translateY(0)}
+
+/* ─── DROPS PAGE ─────────────────────────────────────────────────────────────── */
+.drops-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.drops-search{font-family:var(--mono);font-size:.68rem;background:var(--glass);border:1px solid var(--glass-b);color:var(--w);padding:8px 14px;border-radius:2px;outline:none;transition:border-color .18s;width:220px;letter-spacing:.06em}
+.drops-search::placeholder{color:var(--wd)}
+.drops-search:focus{border-color:var(--p)}
+.filter-btn{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:6px 13px;border:1px solid var(--glass-b);border-radius:2px;background:transparent;color:var(--wd);cursor:pointer;transition:all .18s}
+.filter-btn:hover,.filter-btn.on{border-color:var(--p);color:var(--p);background:var(--pd)}
+.filter-label{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;color:var(--wd);text-transform:uppercase;margin-right:2px}
+
+.drops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:8px}
+.exo-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:3px;padding:14px 16px;transition:all .2s;position:relative;overflow:hidden;cursor:default}
+.exo-card:hover{background:var(--glass-h);border-color:rgba(196,167,231,.2);transform:translateY(-1px)}
+.exo-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px}
+.exo-card.ar::before{background:linear-gradient(180deg,#5b9cf6,#3a7bd5)}
+.exo-card.backpack::before{background:linear-gradient(180deg,#9ecf9a,#5fa85b)}
+.exo-card.chest::before{background:linear-gradient(180deg,#c4a7e7,#8a6bc4)}
+.exo-card.gloves::before{background:linear-gradient(180deg,#aad4f5,#5ba0d0)}
+.exo-card.holster::before{background:linear-gradient(180deg,#e07b74,#bc4e47)}
+.exo-card.kneepads::before{background:linear-gradient(180deg,#87ceeb,#4a9ab5)}
+.exo-card.lmg::before{background:linear-gradient(180deg,#f5c842,#d4a017)}
+.exo-card.mmr::before{background:linear-gradient(180deg,#c8e89a,#8bb85e)}
+.exo-card.mask::before{background:linear-gradient(180deg,#9ae8d4,#4ab89a)}
+.exo-card.pistol::before{background:linear-gradient(180deg,#e8c87a,#c4962d)}
+.exo-card.rifle::before{background:linear-gradient(180deg,#f5a07a,#d46b3a)}
+.exo-card.shotgun::before{background:linear-gradient(180deg,#a0e87a,#6abf3a)}
+.exo-card.smg::before{background:linear-gradient(180deg,#78c8f5,#3a8fbf)}
+.exo-name{font-family:var(--title);font-size:.74rem;font-weight:700;letter-spacing:.1em;color:var(--w);margin-bottom:6px;padding-left:10px}
+.exo-type-badge{display:inline-block;font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-bottom:8px;margin-left:10px}
+.exo-source{font-family:var(--ui);font-size:.8rem;color:var(--wd);line-height:1.5;padding-left:10px;margin-bottom:8px}
+.exo-flags{display:flex;gap:5px;flex-wrap:wrap;padding-left:10px}
+.flag{font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px;border:1px solid}
+.flag.no{color:rgba(158,207,154,.7);border-color:rgba(158,207,154,.25);background:rgba(158,207,154,.07)}
+.flag.raid{color:rgba(224,123,116,.9);border-color:rgba(224,123,116,.3);background:rgba(224,123,116,.08)}
+.flag.blueprint{color:rgba(126,200,227,.9);border-color:rgba(126,200,227,.3);background:rgba(126,200,227,.08)}
+.flag.initially{color:rgba(196,167,231,.9);border-color:rgba(196,167,231,.3);background:rgba(196,167,231,.08)}
+.flag.quest{color:rgba(232,200,122,.9);border-color:rgba(232,200,122,.3);background:rgba(232,200,122,.08)}
+.flag.vendor{color:rgba(200,180,120,.9);border-color:rgba(200,180,120,.3);background:rgba(200,180,120,.08)}
+.flag.campaign{color:rgba(154,232,212,.9);border-color:rgba(154,232,212,.3);background:rgba(154,232,212,.08)}
+.flag.incursion{color:rgba(245,192,66,.9);border-color:rgba(245,192,66,.3);background:rgba(245,192,66,.08)}
+.flag.unknown{color:rgba(180,180,180,.7);border-color:rgba(180,180,180,.2);background:rgba(180,180,180,.05)}
+.flag.raidquest{color:rgba(224,140,100,.9);border-color:rgba(224,140,100,.3);background:rgba(224,140,100,.08)}
+.flag.legendary{color:rgba(232,200,122,.9);border-color:rgba(232,200,122,.3);background:rgba(232,200,122,.1)}
+.note-badge{font-family:var(--mono);font-size:.52rem;color:var(--ng);margin-left:10px;margin-top:4px;opacity:.85}
+.note-badge.gold{color:var(--gold)}
+.note-badge.green{color:var(--ok)}
+.note-badge.purple{color:var(--p)}
+
+.drops-stats{font-family:var(--mono);font-size:.6rem;color:var(--wd);letter-spacing:.1em;margin-bottom:12px}
+.drops-stats span{color:var(--p)}
+
+/* type pill colors */
+.tb-ar{color:#5b9cf6;background:rgba(91,156,246,.12);border:1px solid rgba(91,156,246,.25)}
+.tb-backpack{color:#9ecf9a;background:rgba(158,207,154,.1);border:1px solid rgba(158,207,154,.22)}
+.tb-chest{color:#c4a7e7;background:rgba(196,167,231,.12);border:1px solid rgba(196,167,231,.25)}
+.tb-gloves{color:#aad4f5;background:rgba(170,212,245,.1);border:1px solid rgba(170,212,245,.22)}
+.tb-holster{color:#e07b74;background:rgba(224,123,116,.1);border:1px solid rgba(224,123,116,.25)}
+.tb-kneepads{color:#87ceeb;background:rgba(135,206,235,.1);border:1px solid rgba(135,206,235,.22)}
+.tb-lmg{color:#f5c842;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.22)}
+.tb-mmr{color:#c8e89a;background:rgba(200,232,154,.1);border:1px solid rgba(200,232,154,.22)}
+.tb-mask{color:#9ae8d4;background:rgba(154,232,212,.1);border:1px solid rgba(154,232,212,.22)}
+.tb-pistol{color:#e8c87a;background:rgba(232,200,122,.1);border:1px solid rgba(232,200,122,.22)}
+.tb-rifle{color:#f5a07a;background:rgba(245,160,122,.1);border:1px solid rgba(245,160,122,.22)}
+.tb-shotgun{color:#a0e87a;background:rgba(160,232,122,.1);border:1px solid rgba(160,232,122,.22)}
+.tb-smg{color:#78c8f5;background:rgba(120,200,245,.1);border:1px solid rgba(120,200,245,.22)}
 
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(196,167,231,.28);border-radius:2px}
+::-webkit-scrollbar-thumb{background:rgba(196,167,231,.25);border-radius:2px}
 ::-webkit-scrollbar-thumb:hover{background:var(--p)}
 
 @media(max-width:600px){
   header{flex-direction:column;gap:12px;align-items:flex-start}
-  .sgrid{grid-template-columns:1fr}
-  .slider-wrap input[type=range]{width:80px}
+  .sgrid,.drops-grid{grid-template-columns:1fr}
+  .slider-wrap input[type=range]{width:78px}
+  .main-nav{overflow-x:auto}
 }
 </style>
 </head>
@@ -153,50 +231,77 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 <div class="wrap">
   <header>
     <div class="logo">
-      <h1>DIV<em>2</em> CFG EDITOR</h1>
-      <sub>graphic_settings.cfg // community tool</sub>
+      <h1>DIV<em>2</em> COMMUNITY HUB</h1>
+      <sub>cfg editor // exotic drops // community tool</sub>
     </div>
     <div class="hdr-right">
       <span id="file-badge">● LOADED</span>
-      <span class="pill">v2.0.0</span>
+      <span class="pill">v3.0.0</span>
     </div>
   </header>
 
-  <!-- UPLOAD CARD -->
-  <div class="card">
-    <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
-    <div class="slabel">Load Config</div>
-    <div id="drop-zone">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <path d="M16 4v18M8 14l8-10 8 10" stroke="#c4a7e7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M4 24h24v4H4z" stroke="#c4a7e7" stroke-width="1" opacity=".4"/>
-      </svg>
-      <h3>Drop graphic_settings.cfg here</h3>
-      <p>or click to browse · .cfg / .txt</p>
-      <input type="file" id="file-input" accept=".cfg,.txt">
+  <!-- MAIN NAV -->
+  <nav class="main-nav">
+    <button class="nav-tab active" onclick="switchPage('cfg',this)">⚙ CFG Editor</button>
+    <button class="nav-tab" onclick="switchPage('drops',this)">◈ Exotic Drops</button>
+  </nav>
+
+  <!-- ════════════════════════ CFG PAGE ════════════════════════ -->
+  <div class="page active" id="page-cfg">
+    <div class="card">
+      <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
+      <div class="slabel">Load Config</div>
+      <div id="drop-zone">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path d="M16 4v18M8 14l8-10 8 10" stroke="#c4a7e7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 24h24v4H4z" stroke="#c4a7e7" stroke-width="1" opacity=".35"/>
+        </svg>
+        <h3>Drop graphic_settings.cfg here</h3>
+        <p>or click to browse · .cfg / .txt</p>
+        <input type="file" id="file-input" accept=".cfg,.txt">
+      </div>
+      <div id="file-error">⚠ No Division 2 graphics settings found in this file. Please load a valid graphic_settings.cfg.</div>
+      <div id="preset-section">
+        <div class="slabel">Presets</div>
+        <div class="preset-bar">
+          <span class="plabel">Load //</span>
+          <button class="pbtn" onclick="loadPreset('fullbright')">Fullbright</button>
+          <button class="pbtn" onclick="loadPreset('low')">Low</button>
+          <button class="pbtn" onclick="loadPreset('medium')">Medium</button>
+          <button class="pbtn" onclick="loadPreset('high')">High</button>
+        </div>
+      </div>
     </div>
-    <div class="slabel">Presets</div>
-    <div class="preset-bar">
-      <span class="plabel">Load //</span>
-      <button class="pbtn star" onclick="loadPreset('fullbright')">★ Fullbright</button>
-      <button class="pbtn" onclick="loadPreset('low')">Low</button>
-      <button class="pbtn" onclick="loadPreset('medium')">Medium</button>
-      <button class="pbtn" onclick="loadPreset('high')">High</button>
+
+    <div class="card" id="settings-panel">
+      <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
+      <div class="slabel">Settings</div>
+      <div class="cat-tabs" id="cat-tabs"></div>
+      <div class="sgrid" id="sgrid"></div>
+      <div class="action-bar">
+        <div class="abl">
+          <button class="btn btn-p" onclick="downloadCfg()">⬇ Download .cfg</button>
+          <button class="btn btn-g" onclick="openRaw()">{ } Raw</button>
+        </div>
+        <button class="btn btn-d" onclick="resetEditor()">✕ Clear</button>
+      </div>
     </div>
   </div>
 
-  <!-- SETTINGS CARD (hidden until loaded) -->
-  <div class="card" id="settings-panel">
-    <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
-    <div class="slabel">Settings</div>
-    <div class="cat-tabs" id="cat-tabs"></div>
-    <div class="sgrid" id="sgrid"></div>
-    <div class="action-bar">
-      <div class="abl">
-        <button class="btn btn-p" onclick="downloadCfg()">⬇ Download .cfg</button>
-        <button class="btn btn-g" onclick="openRaw()">{ } Raw</button>
+  <!-- ════════════════════════ DROPS PAGE ════════════════════════ -->
+  <div class="page" id="page-drops">
+    <div class="card">
+      <div class="cc tl"></div><div class="cc tr"></div><div class="cc bl"></div><div class="cc br"></div>
+      <div class="slabel">Exotic Drop Database</div>
+      <div class="drops-controls">
+        <input class="drops-search" id="drops-search" type="text" placeholder="Search exotics..." oninput="renderDrops()">
+        <span class="filter-label">Type //</span>
+        <div id="type-filters" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+        <span class="filter-label" style="margin-left:8px">Lock //</span>
+        <div id="lock-filters" style="display:flex;gap:5px;flex-wrap:wrap"></div>
       </div>
-      <button class="btn btn-d" onclick="resetEditor()">✕ Clear</button>
+      <div class="drops-stats" id="drops-stats"></div>
+      <div class="drops-grid" id="drops-grid"></div>
     </div>
   </div>
 </div>
@@ -219,7 +324,186 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 <div id="toast"></div>
 
 <script>
-// ── SETTING META (min/max/step/note) ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+//  PAGE SWITCHING
+// ════════════════════════════════════════════════════════
+function switchPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+//  EXOTIC DROPS DATA
+// ════════════════════════════════════════════════════════
+const EXOTICS = [
+  // ASSAULT RIFLE
+  {name:"St. Elmo's Engine", type:"Assault Rifle", source:'Play Countdown with targeted loot set on "Assault Rifle"', lock:'No', note:''},
+  {name:"Strega", type:"Assault Rifle", source:'Play Countdown with targeted loot set on "Assault Rifle"', lock:'No', note:''},
+  {name:"Capacitor", type:"Assault Rifle", source:'Complete challenges in The Summit to get your first. Additional from Countdown AR targeted loot', lock:'Initially', note:'Blueprint after first clear'},
+  {name:"Eagle Bearer", type:"Assault Rifle", source:'Complete the Dark Hours raid weekly on all your available characters', lock:'Raid', note:'0.024% Dark Zone Drop Rate'},
+  {name:"Chameleon", type:"Assault Rifle", source:'Play Countdown with targeted loot set on "Assault Rifle"', lock:'No', note:''},
+  {name:"The Bighorn", type:"Assault Rifle", source:'Complete Summit floors and kill bosses on Legendary Difficulty', lock:'Legendary Summit', note:''},
+  // BACKPACK
+  {name:"Memento", type:"Backpack", source:'Play Countdown with targeted loot set on "Backpack"', lock:'No', note:''},
+  {name:"NinjaBike Backpack", type:"Backpack", source:'Play Countdown with targeted loot set on "Backpack"', lock:'No', note:''},
+  {name:"Birdie's Quick Fix", type:"Backpack", source:'Y6 Season 3 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Acosta's Go-Bag", type:"Backpack", source:'Play Countdown with targeted loot set on "Backpack"', lock:'No', note:''},
+  {name:"Harrier Pride", type:"Backpack", source:'Obtained as a reward from the 10th Anniversary Event Track', lock:'Unknown', note:''},
+  // CHEST
+  {name:"Tardigrade", type:"Chest", source:'Play Countdown with targeted loot set on "Body Armor"', lock:'No', note:''},
+  {name:"Provocator", type:"Chest", source:'Y6 Season 2 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Ridgeway's Pride", type:"Chest", source:'Complete Summit exotic quest to get first. Additional from Countdown Body Armor targeted loot', lock:'Quest', note:''},
+  {name:"Beacon", type:"Chest", source:'Play Countdown with targeted loot set on "Body Armor"', lock:'No', note:''},
+  {name:"Collector", type:"Chest", source:'Play Countdown with targeted loot set on "Body Armor"', lock:'No', note:''},
+  // GLOVES
+  {name:"BTSU Datagloves", type:"Gloves", source:'Play Countdown with targeted loot set on "Gloves"', lock:'No', note:''},
+  {name:"Bloody Knuckles", type:"Gloves", source:'Play Countdown with targeted loot set on "Gloves"', lock:'No', note:''},
+  {name:"Overdogs", type:"Gloves", source:'Play Countdown with targeted loot set on "Gloves"', lock:'No', note:''},
+  {name:"Exodus", type:"Gloves", source:'Play Countdown with targeted loot set on "Gloves"', lock:'No', note:''},
+  {name:"Rugged Gauntlets", type:"Gloves", source:'Play Countdown with targeted loot set on "Gloves"', lock:'No', note:''},
+  // HOLSTER
+  {name:"Dodge City Gunslinger's Holster", type:"Holster", source:'Complete its exotic quest to get your first. Additional from Countdown Holster targeted loot', lock:'Quest', note:'Buy Quest from Anaya'},
+  {name:"Waveform", type:"Holster", source:'Play Countdown with targeted loot set on "Holster"', lock:'No', note:''},
+  {name:"Shocker Punch", type:"Holster", source:'Play Countdown with targeted loot set on "Holster"', lock:'No', note:''},
+  {name:"Centurion's Scabbard", type:"Holster", source:'Play Countdown with targeted loot set on "Holster"', lock:'No', note:''},
+  {name:"Imperial Dynasty", type:"Holster", source:'Play Countdown with targeted loot set on "Holster"', lock:'No', note:''},
+  {name:"Nimble", type:"Holster", source:'Play Countdown with targeted loot set on "Holster"', lock:'No', note:''},
+  // KNEEPADS
+  {name:"Blacklisters", type:"Kneepads", source:'Y7 Season 2 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Acosta's Kneepads", type:"Kneepads", source:'Play Countdown with targeted loot set on "Kneepads"', lock:'No', note:''},
+  {name:"Sawyer's Kneepads", type:"Kneepads", source:'Play Countdown with targeted loot set on "Kneepads"', lock:'No', note:''},
+  {name:"NinjaBike Kneepads", type:"Kneepads", source:'Play Countdown with targeted loot set on "Kneepads"', lock:'No', note:''},
+  // LMG
+  {name:"Pestilence", type:"LMG", source:'Play Countdown with targeted loot set on "Light Machinegun"', lock:'No', note:''},
+  {name:"Bluescreen", type:"LMG", source:'Complete the Captain Lewis Manhunt to get the blueprint. Then play Countdown with targeted loot set on "Light Machinegun"', lock:'Blueprint', note:''},
+  {name:"Bullet King", type:"LMG", source:'Play Countdown with targeted loot set on "Light Machine Gun"', lock:'No', note:''},
+  {name:"Iron Lung", type:"LMG", source:'Play Countdown with targeted loot set on "Light Machinegun"', lock:'No', note:''},
+  {name:"Pakhan", type:"LMG", source:'Play Countdown with targeted loot set on "Light Machinegun"', lock:'No', note:''},
+  {name:"Big Alejandro", type:"LMG", source:'Obtained as a reward from the 10th Anniversary Event Track', lock:'Unknown', note:''},
+  // MARKSMAN RIFLE
+  {name:"Mantis", type:"Marksman Rifle", source:'Play Countdown with targeted loot set on "Marksman Rifle"', lock:'No', note:''},
+  {name:"Nemesis", type:"Marksman Rifle", source:'Complete its exotic quest to get your first. Additional from Countdown MMR targeted loot', lock:'Quest', note:''},
+  {name:"Dread Edict", type:"Marksman Rifle", source:'Play Countdown with targeted loot set on "Marksman Rifle"', lock:'No', note:''},
+  {name:"Sacrum Imperium", type:"Marksman Rifle", source:'Play Countdown with targeted loot set on "Marksman Rifle"', lock:'No', note:''},
+  {name:"Shroud", type:"Marksman Rifle", source:'Play Countdown with targeted loot set on "Marksman Rifle"', lock:'No', note:''},
+  // MASK
+  {name:"Coyote's Mask", type:"Mask", source:'Play Countdown with targeted loot set on "Mask"', lock:'No', note:''},
+  {name:"Vile", type:"Mask", source:'Play Countdown with targeted loot set on "Mask"', lock:'No', note:''},
+  {name:"Tinkerer", type:"Mask", source:'Y7 Season 1 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Catharsis", type:"Mask", source:'Play Countdown with targeted loot set on "Mask"', lock:'No', note:''},
+  {name:"The Catalyst", type:"Mask", source:'Final mission in the Battle for Brooklyn campaign or from named bosses in Brooklyn', lock:'Campaign', note:''},
+  // PISTOL
+  {name:"Regulus", type:"Pistol", source:'Complete the Iron Horse raid weekly on all your available characters', lock:'Raid Quest', note:''},
+  {name:"Tempest", type:"Pistol", source:'Y7 Season 2 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Liberty", type:"Pistol", source:'Complete its exotic quest to get your first. Additional from Countdown Pistol targeted loot', lock:'Quest', note:''},
+  {name:"Busy Little Bee", type:"Pistol", source:'Play Countdown with targeted loot set on "Pistol"', lock:'No', note:''},
+  {name:"Mosquito", type:"Pistol", source:'Play Countdown with targeted loot set on "Pistols"', lock:'No', note:''},
+  // RIFLE
+  {name:"Vindicator", type:"Rifle", source:'Guaranteed purchase from the Descent vendor for 350 NSA Credits', lock:'Vendor', note:''},
+  {name:"Doctor Home", type:"Rifle", source:'Complete the General Anderson Manhunt to get the blueprint. Then play Countdown with targeted loot set on "Rifle"', lock:'Blueprint', note:''},
+  {name:"The Ravenous", type:"Rifle", source:'Complete the Iron Horse raid weekly on all your available characters', lock:'Raid', note:'0.024% Dark Zone Drop Rate'},
+  {name:"Diamondback", type:"Rifle", source:'Play Countdown with targeted loot set on "Rifle"', lock:'No', note:''},
+  {name:"Merciless", type:"Rifle", source:'Play Countdown with targeted loot set on "Rifle"', lock:'No', note:''},
+  {name:"Bittersweet", type:"Rifle", source:'Play Countdown with targeted loot set on "Rifle"', lock:'No', note:''},
+  // SHOTGUN
+  {name:"Scorpio", type:"Shotgun", source:'Play Countdown with targeted loot set on "Shotgun"', lock:'No', note:''},
+  {name:"Sheriff", type:"Shotgun", source:'Y7 Season 3 Manhunt Climax Mission. Guaranteed drop on the 1st clear on Master difficulty', lock:'Initially', note:'Guaranteed first Master clear'},
+  {name:"Overlord", type:"Shotgun", source:'Play Countdown with targeted loot set on "Shotgun"', lock:'No', note:''},
+  {name:"Sweet Dreams", type:"Shotgun", source:'Play Countdown with targeted loot set on "Shotgun"', lock:'No', note:''},
+  // SMG
+  {name:"Ouroboros", type:"SMG", source:'Play the Paradise Lost Incursion weekly on all your available characters', lock:'Incursion', note:'10% per character weekly'},
+  {name:"Oxpecker", type:"SMG", source:'Play Countdown with targeted loot set on "Sub Machine Gun"', lock:'No', note:''},
+  {name:"Lady Death", type:"SMG", source:'Play Countdown with targeted loot set on "Sub Machine Gun"', lock:'No', note:''},
+  {name:"Backfire", type:"SMG", source:'Play Countdown with targeted loot set on "Sub Machine Gun"', lock:'No', note:''},
+  {name:"The Chatterbox", type:"SMG", source:'Complete its exotic quest to get your first. Additional from Countdown SMG targeted loot', lock:'Quest', note:''},
+];
+
+const TYPE_CSS = {
+  'Assault Rifle':'ar','Backpack':'backpack','Chest':'chest','Gloves':'gloves','Holster':'holster',
+  'Kneepads':'kneepads','LMG':'lmg','Marksman Rifle':'mmr','Mask':'mask','Pistol':'pistol',
+  'Rifle':'rifle','Shotgun':'shotgun','SMG':'smg'
+};
+
+const LOCK_CSS = {
+  'No':'no','Raid':'raid','Raid Quest':'raidquest','Blueprint':'blueprint','Initially':'initially',
+  'Quest':'quest','Vendor':'vendor','Campaign':'campaign','Incursion':'incursion','Unknown':'unknown',
+  'Legendary Summit':'legendary'
+};
+
+let activeTypes = new Set();
+let activeLocks = new Set();
+
+function initDropFilters(){
+  const types = [...new Set(EXOTICS.map(e=>e.type))].sort();
+  const locks = [...new Set(EXOTICS.map(e=>e.lock))].sort();
+  const tf = document.getElementById('type-filters');
+  types.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='filter-btn'; b.textContent=t;
+    b.onclick=()=>{
+      if(activeTypes.has(t)) activeTypes.delete(t); else activeTypes.add(t);
+      b.classList.toggle('on',activeTypes.has(t)); renderDrops();
+    };
+    tf.appendChild(b);
+  });
+  const lf = document.getElementById('lock-filters');
+  locks.forEach(l=>{
+    const b=document.createElement('button');
+    b.className='filter-btn'; b.textContent=l;
+    b.onclick=()=>{
+      if(activeLocks.has(l)) activeLocks.delete(l); else activeLocks.add(l);
+      b.classList.toggle('on',activeLocks.has(l)); renderDrops();
+    };
+    lf.appendChild(b);
+  });
+  renderDrops();
+}
+
+function noteClass(note){
+  if(!note) return '';
+  if(note.toLowerCase().includes('blueprint')) return 'gold';
+  if(note.toLowerCase().includes('guaranteed')) return 'green';
+  if(note.toLowerCase().includes('dark zone') || note.toLowerCase().includes('0.0')) return 'purple';
+  if(note.toLowerCase().includes('%')) return 'gold';
+  return '';
+}
+
+function renderDrops(){
+  const q = document.getElementById('drops-search').value.toLowerCase();
+  let list = EXOTICS;
+  if(q) list = list.filter(e=>e.name.toLowerCase().includes(q)||e.source.toLowerCase().includes(q)||e.type.toLowerCase().includes(q));
+  if(activeTypes.size) list = list.filter(e=>activeTypes.has(e.type));
+  if(activeLocks.size) list = list.filter(e=>activeLocks.has(e.lock));
+
+  document.getElementById('drops-stats').innerHTML = `Showing <span>${list.length}</span> of <span>${EXOTICS.length}</span> exotics`;
+
+  const grid = document.getElementById('drops-grid');
+  grid.innerHTML='';
+  list.forEach(e=>{
+    const tc = TYPE_CSS[e.type]||'ar';
+    const lc = LOCK_CSS[e.lock]||'no';
+    const nc = noteClass(e.note);
+    const div = document.createElement('div');
+    div.className=`exo-card ${tc}`;
+    div.innerHTML=`
+      <div class="exo-name">${e.name}</div>
+      <span class="exo-type-badge tb-${tc}">${e.type}</span>
+      <div class="exo-source">${e.source}</div>
+      <div class="exo-flags">
+        <span class="flag ${lc}">${e.lock}</span>
+        ${e.note ? `<span class="note-badge ${nc}">// ${e.note}</span>` : ''}
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+initDropFilters();
+
+// ════════════════════════════════════════════════════════
+//  CFG EDITOR
+// ════════════════════════════════════════════════════════
 const META = {
   allowedTearing:              {min:0,max:1,step:1,note:'0=off 1=on'},
   "anisotropy quality":        {min:0,max:16,step:1},
@@ -283,150 +567,106 @@ const PRESETS = {
   fullbright:{allowedTearing:1,"anisotropy quality":0,bloom:false,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:145,"distant envmap":true,dof:false,"extra streaming distance":0,fog:2,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":3000,"high res sky textures":false,indoor:false,look2:0,"max anisotropy":2,maxFramerate:1,"num spot shadows":1,"object detail":-0.5,"parallax mapping2":false,"particle quality":0,presentInterval:0,"prio culling distance0":550,"prio culling distance1":250,"prio culling distance2":120,"prio culling distance3":100,"projected textures resolution":0,"reflected objects quality":0,reflections:0,"sector lastlod distance":128,"shadow distance":20,"shadow quality2":0,sharpen2:0.7,"simple shadow filter":1,"snow particles wind":false,"spot shadow resolution":0,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":0,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":1024,"streamer memory fraction":0.75,taa:2,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":5,"vegetation quality":0,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":0},
   low:{allowedTearing:1,"anisotropy quality":0,bloom:false,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:165,"distant envmap":false,dof:false,"extra streaming distance":0,fog:1,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":1000,"high res sky textures":false,indoor:false,look2:0,"max anisotropy":2,maxFramerate:1,"num spot shadows":1,"object detail":0,"parallax mapping2":false,"particle quality":0,presentInterval:0,"prio culling distance0":400,"prio culling distance1":200,"prio culling distance2":100,"prio culling distance3":80,"projected textures resolution":0,"reflected objects quality":0,reflections:0,"sector lastlod distance":64,"shadow distance":10,"shadow quality2":0,sharpen2:0,"simple shadow filter":1,"snow particles wind":false,"spot shadow resolution":0,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":0,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":512,"streamer memory fraction":0.5,taa:0,"terrain high quality texture compression":false,"terrain texture lod":50,"terrain vertex lod":3,"vegetation quality":0,"view scale":0.85,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":0},
   medium:{allowedTearing:0,"anisotropy quality":4,bloom:true,"bloom dirt":false,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:144,"distant envmap":true,dof:false,"extra streaming distance":100,fog:2,fogBlur:false,glare:false,"hdr UI peak":400,"hdr peak":1500,"high res sky textures":true,indoor:true,look2:0,"max anisotropy":8,maxFramerate:0,"num spot shadows":4,"object detail":0.5,"parallax mapping2":false,"particle quality":1,presentInterval:0,"prio culling distance0":800,"prio culling distance1":400,"prio culling distance2":200,"prio culling distance3":150,"projected textures resolution":1,"reflected objects quality":1,reflections:1,"sector lastlod distance":192,"shadow distance":40,"shadow quality2":1,sharpen2:0.3,"simple shadow filter":1,"snow particles wind":true,"spot shadow resolution":1,"ss reflection3":0,"ss shadows2":0,"ssao quality 2":1,sss3:false,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":1024,"streamer memory fraction":0.75,taa:1,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":5,"vegetation quality":1,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:false,"water quality":1},
-  high:{allowedTearing:0,"anisotropy quality":16,bloom:true,"bloom dirt":true,brightness2:0,"chromatic aberration":false,contrast2:0.5,customFPSLimit:144,"distant envmap":true,dof:true,"extra streaming distance":300,fog:3,fogBlur:true,glare:true,"hdr UI peak":600,"hdr peak":3000,"high res sky textures":true,indoor:true,look2:0,"max anisotropy":16,maxFramerate:0,"num spot shadows":8,"object detail":1,"parallax mapping2":true,"particle quality":2,presentInterval:0,"prio culling distance0":1200,"prio culling distance1":700,"prio culling distance2":400,"prio culling distance3":300,"projected textures resolution":2,"reflected objects quality":2,reflections:2,"sector lastlod distance":256,"shadow distance":80,"shadow quality2":2,sharpen2:0.2,"simple shadow filter":0,"snow particles wind":true,"spot shadow resolution":2,"ss reflection3":2,"ss shadows2":2,"ssao quality 2":2,sss3:true,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":2048,"streamer memory fraction":0.85,taa:2,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":8,"vegetation quality":2,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:true,"water quality":2},
+  high:{allowedTearing:0,"anisotropy quality":8,bloom:true,"bloom dirt":true,brightness2:0,"chromatic aberration":true,contrast2:0.5,customFPSLimit:144,"distant envmap":true,dof:true,"extra streaming distance":500,fog:3,fogBlur:true,glare:true,"hdr UI peak":600,"hdr peak":3000,"high res sky textures":true,indoor:true,look2:0,"max anisotropy":16,maxFramerate:0,"num spot shadows":8,"object detail":1,"parallax mapping2":true,"particle quality":2,presentInterval:0,"prio culling distance0":1200,"prio culling distance1":800,"prio culling distance2":400,"prio culling distance3":300,"projected textures resolution":2,"reflected objects quality":2,reflections:2,"sector lastlod distance":320,"shadow distance":100,"shadow quality2":2,sharpen2:0.2,"simple shadow filter":0,"snow particles wind":true,"spot shadow resolution":2,"ss reflection3":2,"ss shadows2":2,"ssao quality 2":2,sss3:true,stereo3d:0,stereoeyedist:0.065,stereoscreensize:1.2,"streamer dedicated budget":2048,"streamer memory fraction":0.9,taa:1,"terrain high quality texture compression":true,"terrain texture lod":100,"terrain vertex lod":10,"vegetation quality":2,"view scale":1,"view scale maximum":1,"view scale minimum":0.5,vignette:true,"water quality":2},
 };
 
-let config = {}, activeCat = 'Performance';
+// known div2 cfg keys used for validation
+const KNOWN_CFG_KEYS = new Set(['allowedTearing','anisotropy quality','brightness2','contrast2','customFPSLimit','fog','bloom','taa','view scale','shadow distance','reflections','presentInterval','maxFramerate','streamer dedicated budget','particle quality','vegetation quality','water quality','sharpen2']);
 
-// ── PARSE ────────────────────────────────────────────────────────────────────
-function parseCfg(text) {
-  const r = {};
-  for (const line of text.split('\n')) {
-    const t = line.trim();
-    if (!t||t==='{' ||t==='}') continue;
-    const m = t.match(/^\["([^"]+)"\]\s*=\s*(.+?),?\s*$/) ||
-              t.match(/^([a-zA-Z_]\w*)\s*=\s*(.+?),?\s*$/);
-    if (!m) continue;
-    let v = m[2].trim().replace(/,$/, '');
-    if (v==='true') r[m[1]]=true;
-    else if (v==='false') r[m[1]]=false;
-    else if (!isNaN(v)) r[m[1]]=parseFloat(v);
-    else r[m[1]]=v;
+let config={}, activeCat='Performance';
+
+function parseCfg(txt){
+  const out={};
+  for(const line of txt.split('\n')){
+    const m=line.match(/^\s*([^\s=]+(?:\s+[^\s=]+)*)\s*=\s*(.+?)\s*,?\s*$/);
+    if(!m)continue;
+    const k=m[1].trim(),v=m[2].trim();
+    if(v==='true')out[k]=true;
+    else if(v==='false')out[k]=false;
+    else{const n=parseFloat(v);out[k]=isNaN(n)?v:n;}
   }
-  return r;
+  return out;
 }
 
-// ── SERIALIZE ─────────────────────────────────────────────────────────────────
-function serializeCfg(cfg) {
-  let o='{\n';
-  for (const [k,v] of Object.entries(cfg)) {
-    const ks=/^[a-zA-Z_]\w*$/.test(k)?k:`["${k}"]`;
+function isValidDiv2Cfg(obj){
+  // check if at least 3 known keys are present
+  let hits=0;
+  for(const k of KNOWN_CFG_KEYS){if(k in obj)hits++;}
+  return hits>=3;
+}
+
+function serializeCfg(cfg){
+  let o='GFXSettings\n{\n';
+  for(const[k,v]of Object.entries(cfg)){
+    const ks=k.includes(' ')?`["${k}"]`:k;
     let vs;
-    if (typeof v==='boolean') vs=v?'true':'false';
-    else if (typeof v==='number') vs=Number.isInteger(v)?String(v):parseFloat(v.toFixed(8)).toString();
+    if(typeof v==='boolean')vs=v?'true':'false';
+    else if(typeof v==='number')vs=String(v);
     else vs=String(v);
     o+=`\t${ks} = ${vs},\n`;
   }
   return o+'}';
 }
 
-// ── BUILD EDITOR ──────────────────────────────────────────────────────────────
-function buildEditor() {
+function buildEditor(){
   document.getElementById('settings-panel').classList.add('on');
-
   const te=document.getElementById('cat-tabs');
   te.innerHTML='';
-  for (const cat of [...Object.keys(CATEGORIES),'All']) {
+  for(const cat of[...Object.keys(CATEGORIES),'All']){
     const b=document.createElement('button');
     b.className='ctab'+(cat===activeCat?' on':'');
     b.textContent=cat;
     b.onclick=()=>{activeCat=cat;buildEditor()};
     te.appendChild(b);
   }
-
   const grid=document.getElementById('sgrid');
   grid.innerHTML='';
   const keys=activeCat==='All'?Object.keys(config):(CATEGORIES[activeCat]||[]).filter(k=>k in config);
-
-  for (const key of keys) {
+  for(const key of keys){
     const val=config[key];
     const row=document.createElement('div');
     row.className='srow';
-
     const lbl=document.createElement('span');
-    lbl.className='skey';
-    lbl.textContent=key;
-    const m=META[key];
-    if (m?.note) lbl.title=m.note;
+    lbl.className='skey'; lbl.textContent=key;
+    const m=META[key]; if(m?.note)lbl.title=m.note;
     row.appendChild(lbl);
-
-    if (typeof val==='boolean') {
-      // TOGGLE
-      const wrap=document.createElement('div'); wrap.className='tog-wrap';
-      const vl=document.createElement('span'); vl.className='tog-lbl';
-      vl.style.color=val?'var(--ok)':'var(--ng)';
-      vl.textContent=val?'ON':'OFF';
-      const lab=document.createElement('label'); lab.className='tog';
-      const inp=document.createElement('input'); inp.type='checkbox'; inp.checked=val;
-      inp.onchange=()=>{
-        config[key]=inp.checked;
-        vl.textContent=inp.checked?'ON':'OFF';
-        vl.style.color=inp.checked?'var(--ok)':'var(--ng)';
-      };
-      const sl=document.createElement('span'); sl.className='tog-sl';
-      lab.appendChild(inp); lab.appendChild(sl);
-      wrap.appendChild(vl); wrap.appendChild(lab);
+    if(typeof val==='boolean'){
+      const wrap=document.createElement('div');wrap.className='tog-wrap';
+      const vl=document.createElement('span');vl.className='tog-lbl';
+      vl.style.color=val?'var(--ok)':'var(--ng)';vl.textContent=val?'ON':'OFF';
+      const lab=document.createElement('label');lab.className='tog';
+      const inp=document.createElement('input');inp.type='checkbox';inp.checked=val;
+      inp.onchange=()=>{config[key]=inp.checked;vl.textContent=inp.checked?'ON':'OFF';vl.style.color=inp.checked?'var(--ok)':'var(--ng)';};
+      const sl=document.createElement('span');sl.className='tog-sl';
+      lab.appendChild(inp);lab.appendChild(sl);wrap.appendChild(vl);wrap.appendChild(lab);
       row.appendChild(wrap);
-
-    } else if (typeof val==='number' && m) {
-      // SLIDER with click-to-type
-      const wrap=document.createElement('div'); wrap.className='slider-wrap';
-      const slider=document.createElement('input');
-      slider.type='range';
-      slider.min=m.min; slider.max=m.max; slider.step=m.step;
+    }else if(typeof val==='number'&&m){
+      const wrap=document.createElement('div');wrap.className='slider-wrap';
+      const slider=document.createElement('input');slider.type='range';
+      slider.min=m.min;slider.max=m.max;slider.step=m.step;
       slider.value=Math.min(m.max,Math.max(m.min,val));
-
-      const setFill=()=>{
-        const pct=((slider.value-m.min)/(m.max-m.min))*100;
-        slider.style.background=`linear-gradient(90deg,rgba(196,167,231,.65) ${pct}%,rgba(196,167,231,.15) ${pct}%)`;
-      };
+      const setFill=()=>{const pct=((slider.value-m.min)/(m.max-m.min))*100;slider.style.background=`linear-gradient(90deg,rgba(196,167,231,.65) ${pct}%,rgba(196,167,231,.15) ${pct}%)`;};
       setFill();
-
-      const vd=document.createElement('span');
-      vd.className='slider-val';
-      vd.textContent=parseFloat(slider.value).toString();
-      vd.title='Click to type';
-
-      slider.oninput=()=>{
-        const n=parseFloat(slider.value);
-        config[key]=n;
-        vd.textContent=n.toString();
-        setFill();
-      };
-
+      const vd=document.createElement('span');vd.className='slider-val';vd.textContent=parseFloat(slider.value).toString();vd.title='Click to type';
+      slider.oninput=()=>{const n=parseFloat(slider.value);config[key]=n;vd.textContent=n.toString();setFill();};
       vd.onclick=()=>{
-        const ed=document.createElement('input');
-        ed.className='val-edit'; ed.type='number';
-        ed.value=config[key]; ed.min=m.min; ed.max=m.max; ed.step=m.step;
-        vd.replaceWith(ed); ed.focus(); ed.select();
-        const commit=()=>{
-          let n=parseFloat(ed.value);
-          if(isNaN(n)) n=config[key];
-          n=Math.min(m.max,Math.max(m.min,n));
-          config[key]=n; slider.value=n; setFill();
-          vd.textContent=n.toString(); ed.replaceWith(vd);
-        };
-        ed.onblur=commit;
-        ed.onkeydown=e=>{if(e.key==='Enter')commit();if(e.key==='Escape')ed.replaceWith(vd);};
+        const ed=document.createElement('input');ed.className='val-edit';ed.type='number';
+        ed.value=config[key];ed.min=m.min;ed.max=m.max;ed.step=m.step;
+        vd.replaceWith(ed);ed.focus();ed.select();
+        const commit=()=>{let n=parseFloat(ed.value);if(isNaN(n))n=config[key];n=Math.min(m.max,Math.max(m.min,n));config[key]=n;slider.value=n;setFill();vd.textContent=n.toString();ed.replaceWith(vd);};
+        ed.onblur=commit;ed.onkeydown=e=>{if(e.key==='Enter')commit();if(e.key==='Escape')ed.replaceWith(vd);};
       };
-
-      wrap.appendChild(slider); wrap.appendChild(vd);
-      row.appendChild(wrap);
-
-    } else {
-      // fallback text input
-      const inp=document.createElement('input');
-      inp.className='val-edit'; inp.type='number'; inp.value=val; inp.style.width='70px';
+      wrap.appendChild(slider);wrap.appendChild(vd);row.appendChild(wrap);
+    }else{
+      const inp=document.createElement('input');inp.className='val-edit';inp.type='number';inp.value=val;inp.style.width='70px';
       inp.oninput=()=>{const n=parseFloat(inp.value);if(!isNaN(n))config[key]=n;};
       row.appendChild(inp);
     }
-
     grid.appendChild(row);
   }
 }
 
-// ── RAW MODAL ─────────────────────────────────────────────────────────────────
-function openRaw() {
+function openRaw(){
   const raw=serializeCfg(config).replace(/&/g,'&amp;').replace(/</g,'&lt;');
   document.getElementById('raw-out').innerHTML=raw
     .replace(/(\["[^"]+"\]|\t[a-zA-Z_]\w*)/g,'<span class="rk">$1</span>')
@@ -437,38 +677,43 @@ function openRaw() {
 }
 function closeRaw(){document.getElementById('raw-modal').classList.remove('on')}
 function copyRaw(){navigator.clipboard.writeText(serializeCfg(config)).then(()=>showToast('Copied ✓'))}
-
 document.getElementById('raw-modal').onclick=e=>{if(e.target===document.getElementById('raw-modal'))closeRaw()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRaw()});
 
-// ── DOWNLOAD ──────────────────────────────────────────────────────────────────
 function downloadCfg(){
   const blob=new Blob([serializeCfg(config)],{type:'text/plain'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='graphic_settings.cfg'; a.click();
+  a.href=URL.createObjectURL(blob);a.download='graphic_settings.cfg';a.click();
   showToast('graphic_settings.cfg downloaded ✓');
 }
 
-// ── PRESETS ───────────────────────────────────────────────────────────────────
 function loadPreset(name){
   config={...PRESETS[name]};
   activeCat='Performance';
   const b=document.getElementById('file-badge');
-  b.style.display='inline-block';
-  b.textContent=`● PRESET: ${name.toUpperCase()}`;
-  buildEditor();
-  showToast(`Preset "${name}" loaded`);
+  b.style.display='inline-block';b.textContent=`● PRESET: ${name.toUpperCase()}`;
+  document.getElementById('file-error').style.display='none';
+  buildEditor();showToast(`Preset "${name}" loaded`);
 }
 
-// ── FILE LOAD ─────────────────────────────────────────────────────────────────
 function handleFile(file){
   const r=new FileReader();
   r.onload=e=>{
-    config=parseCfg(e.target.result);
-    activeCat='Performance';
+    const parsed=parseCfg(e.target.result);
+    const errEl=document.getElementById('file-error');
+    if(!isValidDiv2Cfg(parsed)){
+      errEl.style.display='block';
+      document.getElementById('settings-panel').classList.remove('on');
+      document.getElementById('file-badge').style.display='none';
+      showToast('Invalid file — not a Division 2 config');
+      return;
+    }
+    errEl.style.display='none';
+    config=parsed;activeCat='Performance';
+    document.getElementById('preset-section').classList.add('on');
     const b=document.getElementById('file-badge');
-    b.style.display='inline-block'; b.textContent=`● ${file.name}`;
-    buildEditor(); showToast('Config loaded ✓');
+    b.style.display='inline-block';b.textContent=`● ${file.name}`;
+    buildEditor();showToast('Config loaded ✓');
   };
   r.readAsText(file);
 }
@@ -478,123 +723,112 @@ dz.ondragover=e=>{e.preventDefault();dz.classList.add('drag-over')};
 dz.ondragleave=()=>dz.classList.remove('drag-over');
 dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0])};
 
-// ── RESET ─────────────────────────────────────────────────────────────────────
 function resetEditor(){
   config={};
   document.getElementById('settings-panel').classList.remove('on');
   document.getElementById('file-badge').style.display='none';
+  document.getElementById('preset-section').classList.remove('on');
+  document.getElementById('file-error').style.display='none';
   showToast('Cleared');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
 let tt;
 function showToast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('on');
-  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2400);
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400);
 }
 
-// ── ANIMATED DOT MATRIX CANVAS ───────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+//  DOT MATRIX BACKGROUND — proximity-connected flowing dots
+// ════════════════════════════════════════════════════════
 (function(){
   const canvas=document.getElementById('bg-canvas');
   const ctx=canvas.getContext('2d');
-  const STEP=28, DOT_R=1;
-  let W,H,cols,rows,allEdges,staticEdges,pulses=[];
+
+  const DOT_COUNT=120;
+  const MAX_DIST=130;
+  const MAX_DIST_SQ=MAX_DIST*MAX_DIST;
+  const DOT_R=1.5;
+  const SPEED=0.28;
+  const COLOR='196,167,231';
+
+  let W,H,dots=[];
 
   function resize(){
     W=canvas.width=window.innerWidth;
     H=canvas.height=window.innerHeight;
-    cols=Math.ceil(W/STEP)+1;
-    rows=Math.ceil(H/STEP)+1;
-    build();
   }
 
-  function dotXY(i){ return {x:(i%cols)*STEP+STEP/2, y:Math.floor(i/cols)*STEP+STEP/2} }
-  function idx(r,c){ return r*cols+c }
-
-  function build(){
-    allEdges=[];
-    for(let r=0;r<rows;r++){
-      for(let c=0;c<cols;c++){
-        if(c+1<cols) allEdges.push([idx(r,c),idx(r,c+1)]);
-        if(r+1<rows) allEdges.push([idx(r,c),idx(r+1,c)]);
-        if(r+1<rows&&c+1<cols&&Math.random()<0.12) allEdges.push([idx(r,c),idx(r+1,c+1)]);
-        if(r+1<rows&&c-1>=0&&Math.random()<0.08) allEdges.push([idx(r,c),idx(r+1,c-1)]);
-      }
-    }
-    staticEdges=[...allEdges].sort(()=>Math.random()-.5).slice(0,80);
-    pulses=[];
-    for(let i=0;i<20;i++) spawnPulse(true);
+  function mkDot(){
+    const angle=Math.random()*Math.PI*2;
+    const spd=SPEED*(0.4+Math.random()*0.7);
+    return {
+      x:Math.random()*W,
+      y:Math.random()*H,
+      vx:Math.cos(angle)*spd,
+      vy:Math.sin(angle)*spd,
+      pulse:Math.random()*Math.PI*2,  // phase offset for subtle glow pulse
+    };
   }
 
-  function spawnPulse(immediate){
-    if(!allEdges||!allEdges.length) return;
-    const e=allEdges[Math.floor(Math.random()*allEdges.length)];
-    pulses.push({
-      a:e[0], b:e[1],
-      t:immediate?Math.random():0,
-      speed:0.003+Math.random()*0.009,
-      alpha:0.45+Math.random()*0.55,
-      size:3+Math.random()*4,
-    });
+  function init(){
+    dots=[];
+    for(let i=0;i<DOT_COUNT;i++) dots.push(mkDot());
   }
 
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // static faint connecting lines
-    ctx.lineWidth=0.4;
-    ctx.strokeStyle='rgba(196,167,231,0.06)';
-    for(const [ai,bi] of staticEdges){
-      const a=dotXY(ai),b=dotXY(bi);
-      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    // update positions
+    for(const d of dots){
+      d.x+=d.vx; d.y+=d.vy;
+      d.pulse+=0.018;
+      // wrap with soft edge
+      if(d.x<-20)d.x=W+20;
+      if(d.x>W+20)d.x=-20;
+      if(d.y<-20)d.y=H+20;
+      if(d.y>H+20)d.y=-20;
     }
 
-    // dot grid
-    const total=cols*rows;
-    for(let i=0;i<total;i++){
-      const {x,y}=dotXY(i);
-      ctx.beginPath(); ctx.arc(x,y,DOT_R,0,Math.PI*2);
-      ctx.fillStyle='rgba(196,167,231,0.18)'; ctx.fill();
+    // draw connections
+    for(let i=0;i<dots.length;i++){
+      for(let j=i+1;j<dots.length;j++){
+        const dx=dots[i].x-dots[j].x;
+        const dy=dots[i].y-dots[j].y;
+        const dSq=dx*dx+dy*dy;
+        if(dSq<MAX_DIST_SQ){
+          const t=1-(dSq/MAX_DIST_SQ); // 0..1, 1=touching
+          const alpha=t*t*0.22;
+          ctx.beginPath();
+          ctx.moveTo(dots[i].x,dots[i].y);
+          ctx.lineTo(dots[j].x,dots[j].y);
+          ctx.strokeStyle=`rgba(${COLOR},${alpha})`;
+          ctx.lineWidth=t*1.1;
+          ctx.stroke();
+        }
+      }
     }
 
-    // moving signal pulses
-    const dead=[];
-    for(let i=0;i<pulses.length;i++){
-      const p=pulses[i];
-      p.t+=p.speed;
-      if(p.t>=1){dead.push(i);continue}
-      const a=dotXY(p.a),b=dotXY(p.b);
-      const px=a.x+(b.x-a.x)*p.t;
-      const py=a.y+(b.y-a.y)*p.t;
-
-      // trail line
-      const grad=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
-      const trailStart=Math.max(0,p.t-0.4);
-      grad.addColorStop(trailStart,`rgba(196,167,231,0)`);
-      grad.addColorStop(p.t,`rgba(196,167,231,${p.alpha*0.5})`);
-      ctx.beginPath(); ctx.strokeStyle=grad; ctx.lineWidth=1;
-      ctx.moveTo(a.x+(b.x-a.x)*trailStart, a.y+(b.y-a.y)*trailStart);
-      ctx.lineTo(px,py); ctx.stroke();
-
-      // glowing head
-      const g=ctx.createRadialGradient(px,py,0,px,py,p.size);
-      g.addColorStop(0,`rgba(230,215,255,${p.alpha})`);
-      g.addColorStop(0.4,`rgba(196,167,231,${p.alpha*0.5})`);
-      g.addColorStop(1,'rgba(196,167,231,0)');
-      ctx.beginPath(); ctx.arc(px,py,p.size,0,Math.PI*2);
-      ctx.fillStyle=g; ctx.fill();
+    // draw dots
+    for(const d of dots){
+      const glow=0.55+0.2*Math.sin(d.pulse);
+      // outer glow
+      const g=ctx.createRadialGradient(d.x,d.y,0,d.x,d.y,DOT_R*4);
+      g.addColorStop(0,`rgba(${COLOR},${glow*0.28})`);
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.beginPath();ctx.arc(d.x,d.y,DOT_R*4,0,Math.PI*2);
+      ctx.fillStyle=g;ctx.fill();
+      // core dot
+      ctx.beginPath();ctx.arc(d.x,d.y,DOT_R,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${COLOR},${glow})`;ctx.fill();
     }
-
-    for(let i=dead.length-1;i>=0;i--) pulses.splice(dead[i],1);
-    while(pulses.length<20) spawnPulse(false);
 
     requestAnimationFrame(draw);
   }
 
-  window.addEventListener('resize',resize);
-  resize();
-  draw();
+  window.addEventListener('resize',()=>{resize();init()});
+  resize();init();draw();
 })();
 </script>
 </body>
